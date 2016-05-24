@@ -71,8 +71,6 @@ for i in range(args.numthreads):
     (pid, filename) = next_wget(filelist, args.mirror, args.dldir)
     pids[pid] = filename
 
-import time
-
 totalfailures = 0
 runcleanup = False
 # Since the wget fetcher says wget will sometimes exit successfully even though
