@@ -43,7 +43,7 @@ parser.add_argument("dldir", help="directory to contain downloaded files")
 args = parser.parse_args()
 
 if not os.path.exists(args.dldir):
-    os.mkdir(args.dldir)
+    os.makedirs(args.dldir)
 
 # Just launches the wget and returns the pid
 def wget(mirror, filepath, destdir):
