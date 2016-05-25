@@ -19,8 +19,13 @@
 import argparse
 import subprocess
 import itertools
+import sys
 import os
 import signal
+import logging
+
+logger = logging.getLogger('mirror-test')
+logger.setLevel(logging.DEBUG)
 
 parser = argparse.ArgumentParser()
 
@@ -29,6 +34,9 @@ parser.add_argument("--numthreads", default="8", type=int,
 parser.add_argument("--mirror",
                     default="http://download.ostroproject.org/sstate/ostro-os/",
                     help="url of the mirror")
+parser.add_argument("--logfile",
+                    default="mirror-test.log",
+                    help="Log file to write to")
 parser.add_argument("filelist", help="list of files to download")
 parser.add_argument("dldir", help="directory to contain downloaded files")
 
@@ -63,6 +71,15 @@ with open(args.filelist) as f:
     filelist = [x.strip() for x in f.readlines()]
 filelist = itertools.cycle(filelist)
 
+sh = logging.FileHandler(args.logfile)
+formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+sh.setFormatter(formatter)
+logger.addHandler(sh)
+sh = logging.StreamHandler(sys.stdout)
+formatter = logging.Formatter('%(levelname)s: %(message)s')
+sh.setFormatter(formatter)
+logger.addHandler(sh)
+logger.info('Mirror test started for %s' % args.mirror)
 
 # Start n wget and know that if we only start a new one each time one finishes
 # we will never hit more than n
@@ -82,19 +99,22 @@ try:
     
         if exitcode != 0:
             totalfailures += 1
-            print '\nwget exited with "{}" for file "{}"'.format(exitcode,
-                                                               filename)
+            print '\n'
+            logger.error('wget exited with "{}" for file "{}"'.format(exitcode,
+                                                            filename))
             print 'total failures: {}\n\n'.format(totalfailures)
     
         elif not os.path.exists(filename):
             totalfailures += 1
-            print '\nwget failed for file "{}"'.format(filename)
+            print '\n'
+            logger.error('wget failed for file "{}"'.format(filename))
             print 'total failures: {}\n\n'.format(totalfailures)
     
         (pid, filename) = next_wget(filelist, args.mirror, args.dldir)
         pids[pid] = filename
 except KeyboardInterrupt:
-    print '\nInterrupted - total failures: {}'.format(totalfailures)
+    print '\n'
+    logger.info('Interrupted - total failures: {}'.format(totalfailures))
     runcleanup = True
 
 if runcleanup:
