@@ -81,19 +81,19 @@ sh.setFormatter(formatter)
 logger.addHandler(sh)
 logger.info('Mirror test started for %s' % args.mirror)
 
-# Start n wget and know that if we only start a new one each time one finishes
-# we will never hit more than n
-pids = {}
-for i in range(args.numthreads):
-    (pid, filename) = next_wget(filelist, args.mirror, args.dldir)
-    pids[pid] = filename
-
 totalfailures = 0
 totalfetches = 0
 runcleanup = False
 # Since the wget fetcher says wget will sometimes exit successfully even though
 # it failed, mimic it and verify the file actually exists even on success.
 try:
+    # Start n wget and know that if we only start a new one each time one finishes
+    # we will never hit more than n
+    pids = {}
+    for i in range(args.numthreads):
+        (pid, filename) = next_wget(filelist, args.mirror, args.dldir)
+        pids[pid] = filename
+
     while True:
         (pid, exitcode, res) = os.wait3(0)
         filename = pids.pop(pid)
@@ -119,6 +119,12 @@ except KeyboardInterrupt:
     logger.info('Interrupted - fetched {} files, total failures: {}'.format(totalfetches,
                                                                             totalfailures))
     runcleanup = True
+except:
+    print '\n'
+    msg = 'Unexpected exception - fetched {} files, total failures: {}'
+    msg = msg.format(totalfetches, totalfailures)
+    logger.info(msg)
+    raise
 
 if runcleanup:
     # kill remaining children and wait for them
