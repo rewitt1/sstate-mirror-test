@@ -94,6 +94,7 @@ try:
         (pid, filename) = next_wget(filelist, args.mirror, args.dldir)
         pids[pid] = filename
 except KeyboardInterrupt:
+    print '\nInterrupted - total failures: {}'.format(totalfailures)
     runcleanup = True
 
 if runcleanup:
