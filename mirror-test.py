@@ -89,6 +89,7 @@ for i in range(args.numthreads):
     pids[pid] = filename
 
 totalfailures = 0
+totalfetches = 0
 runcleanup = False
 # Since the wget fetcher says wget will sometimes exit successfully even though
 # it failed, mimic it and verify the file actually exists even on success.
@@ -96,6 +97,7 @@ try:
     while True:
         (pid, exitcode, res) = os.wait3(0)
         filename = pids.pop(pid)
+        totalfetches += 1
     
         if exitcode != 0:
             totalfailures += 1
@@ -114,7 +116,8 @@ try:
         pids[pid] = filename
 except KeyboardInterrupt:
     print '\n'
-    logger.info('Interrupted - total failures: {}'.format(totalfailures))
+    logger.info('Interrupted - fetched {} files, total failures: {}'.format(totalfetches,
+                                                                            totalfailures))
     runcleanup = True
 
 if runcleanup:
