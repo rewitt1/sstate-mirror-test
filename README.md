@@ -7,4 +7,4 @@ To run:
 python ./mirror-test.py sstate-list-build-452 ~/sstate-downloads
 ```
 
-Let the script run for a while (say 10-30 mins) and then interrupt it with Ctrl+C. `mirror-test.log` will have been written out with the results. Note that you will need sufficient disk space available for the downloads (which can be deleted afterwards).
+Let the script run for a while, say 10-30 minutes, and then interrupt it with Ctrl+C (otherwise it will run indefinitely). `mirror-test.log` will have been written out with the results. Note that you will need sufficient disk space available for the downloads - which can be deleted afterwards.
